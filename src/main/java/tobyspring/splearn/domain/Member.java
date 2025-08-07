@@ -22,7 +22,8 @@ import static java.util.Objects.requireNonNull;
 @NaturalIdCache // 같은 트랜잭션에서 자연키로 조회할 때 캐시를 사용한다
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 엔티티 식별자 (인조키)
 
     @Embedded

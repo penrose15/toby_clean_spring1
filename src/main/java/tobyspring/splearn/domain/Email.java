@@ -10,7 +10,7 @@ public record Email(String address) {
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     public Email {
-        if(!VALID_EMAIL_ADDRESS_REGEX.matcher(address).matches()) {
+        if (!VALID_EMAIL_ADDRESS_REGEX.matcher(address).matches()) {
             throw new IllegalArgumentException("invalid email format: " + address);
         }
     }

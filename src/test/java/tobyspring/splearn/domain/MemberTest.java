@@ -14,7 +14,7 @@ class MemberTest {
     @BeforeEach
     void setUp() {
         this.passwordEncoder = createPasswordEncoder();
-        member = createMemberRegister(new MemberRegisterRequest("toby@splearn.com", "toby", "secret"), passwordEncoder);
+        member = createMemberRegister(new MemberRegisterRequest("toby@splearn.com", "charlie", "password1!"), passwordEncoder);
     }
 
 
@@ -61,26 +61,26 @@ class MemberTest {
 
     @Test
     void verifyPassword() {
-        assertThat(member.verifyPassword("secret", passwordEncoder)).isTrue();
+        assertThat(member.verifyPassword("password1!", passwordEncoder)).isTrue();
         assertThat(member.verifyPassword("hello", passwordEncoder)).isFalse(); // wrong password
     }
 
     @Test
     void changeNickname() {
-        assertThat(member.getNickname()).isEqualTo("toby");
-
-        member.changeNickname("charlie");
-
         assertThat(member.getNickname()).isEqualTo("charlie");
+
+        member.changeNickname("charlie1");
+
+        assertThat(member.getNickname()).isEqualTo("charlie1");
     }
 
     @Test
     void changePassword() {
-        assertThat(member.getPasswordHash()).isEqualTo(passwordEncoder.encode("secret"));
+        assertThat(member.getPasswordHash()).isEqualTo(passwordEncoder.encode("password1!"));
 
-        member.changePassword("newSecret", passwordEncoder);
+        member.changePassword("password123!", passwordEncoder);
 
-        assertThat(member.verifyPassword("newSecret", passwordEncoder)).isTrue();
+        assertThat(member.verifyPassword("password123!", passwordEncoder)).isTrue();
     }
 
     @Test
