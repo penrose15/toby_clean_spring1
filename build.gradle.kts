@@ -24,6 +24,8 @@ repositories {
     mavenCentral()
 }
 
+// jdk에서는 라이브러리가 동적으로 agent를 부르는 것을 금함. 이로 인해 테스트를 돌리면 Warning:... 이렇게 문구가 뜨는게 그거임
+// 그래서 명시적으로 agent를 설정해주면 됨
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
 dependencies {

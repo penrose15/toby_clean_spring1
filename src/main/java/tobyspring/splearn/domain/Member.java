@@ -19,14 +19,9 @@ import static java.util.Objects.requireNonNull;
 @Entity
 @Getter
 @ToString
-@NaturalIdCache // 같은 트랜잭션에서 자연키로 조회할 때 캐시를 사용한다
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 엔티티 식별자 (인조키)
+public class Member extends AbstractEntity {
 
-    @Embedded
     @NaturalId // @Id 대신 사용 가능한 자연키로, Id 가 인조키인 경우 대체로 사용가능하다
     private Email email; // 자연키
 
@@ -34,7 +29,6 @@ public class Member {
 
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
     private MemberStatus status;
 
     public static Member register(MemberRegisterRequest createRequest, PasswordEncoder passwordEncoder) {
