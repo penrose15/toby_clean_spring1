@@ -2,8 +2,8 @@ package tobyspring.splearn.adapter.integration;
 
 import org.springframework.context.annotation.Fallback;
 import org.springframework.stereotype.Component;
-import tobyspring.splearn.application.required.EmailSender;
-import tobyspring.splearn.domain.Email;
+import tobyspring.splearn.application.member.required.EmailSender;
+import tobyspring.splearn.domain.shared.Email;
 
 @Component
 @Fallback // 다른 빈을 찾다가 못 찾으면 이를 최후 수단으로 사용

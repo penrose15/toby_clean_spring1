@@ -1,11 +1,12 @@
-package tobyspring.splearn.domain;
+package tobyspring.splearn.domain.member;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static tobyspring.splearn.domain.MemberFixture.*;
+import static tobyspring.splearn.domain.member.MemberFixture.*;
 
 class MemberTest {
     Member member;
@@ -22,14 +23,20 @@ class MemberTest {
     void registerMember() {
         assertThat(member.getStatus())
                 .isEqualTo(MemberStatus.PENDING);
+        assertThat(member.getMemberDetail().getRegisteredAt())
+                .isNotNull();
     }
 
     @Test
     void activateMember() {
+        assertThat(member.getMemberDetail().getActivatedAt())
+                .isNull();
         member.activate();
 
         assertThat(member.getStatus())
                 .isEqualTo(MemberStatus.ACTIVE);
+        assertThat(member.getMemberDetail().getActivatedAt())
+                .isNotNull();
     }
 
     @Test
@@ -104,5 +111,22 @@ class MemberTest {
                 .isInstanceOf(IllegalArgumentException.class);
 
         createMemberRegister(createMemberRegisterRequest("toby@email.com"), passwordEncoder);
+    }
+
+    @Test
+    void updateInfo() {
+        member.activate();
+
+        member.updateInfo(new MemberInfoUpdateRequest("leo", "toby100", "자기소개"));
+
+        assertThat(member.getNickname()).isEqualTo("leo");
+        assertThat(member.getMemberDetail().getProfile().address()).isEqualTo("toby100");
+        assertThat(member.getMemberDetail().getIntroduction()).isEqualTo("자기소개");
+    }
+
+    @Test
+    void url() {
+        var profile = new Profile("tobylee");
+        assertThat(profile.url()).isEqualTo("@tobylee");
     }
 }

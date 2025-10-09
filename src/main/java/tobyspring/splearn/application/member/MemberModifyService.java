@@ -1,14 +1,15 @@
-package tobyspring.splearn.application;
+package tobyspring.splearn.application.member;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import tobyspring.splearn.application.provided.MemberFinder;
-import tobyspring.splearn.application.provided.MemberRegister;
-import tobyspring.splearn.application.required.EmailSender;
-import tobyspring.splearn.application.required.MemberRepository;
-import tobyspring.splearn.domain.*;
+import tobyspring.splearn.application.member.provided.MemberFinder;
+import tobyspring.splearn.application.member.provided.MemberRegister;
+import tobyspring.splearn.application.member.required.EmailSender;
+import tobyspring.splearn.application.member.required.MemberRepository;
+import tobyspring.splearn.domain.member.*;
+import tobyspring.splearn.domain.shared.Email;
 
 @Service
 @Validated
@@ -44,6 +45,24 @@ public class MemberModifyService implements MemberRegister {
         // save 안하면 도메인 이벤트 사용이 안됨
         // 그래서 그냥 save 호출한다고 사용함
         // auditing 을 위해 필요
+    }
+
+    @Override
+    public Member deactivate(Long memberId) {
+        Member member = memberFinder.find(memberId);
+
+        member.deactivate();
+
+        return memberRepository.save(member);
+    }
+
+    @Override
+    public Member updateInfo(Long memberId, MemberInfoUpdateRequest memberInfoUpdateRequest) {
+        Member member = memberFinder.find(memberId);
+
+        member.updateInfo(memberInfoUpdateRequest);
+
+        return memberRepository.save(member);
     }
 
     private void checkDuplicateEmail(MemberRegisterRequest registerRequest) {

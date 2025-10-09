@@ -1,4 +1,4 @@
-package tobyspring.splearn.application.provided;
+package tobyspring.splearn.application.member.provided;
 
 import jakarta.persistence.EntityManager;
 import jakarta.validation.ConstraintViolationException;
@@ -7,12 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import tobyspring.splearn.SplearnTestConfiguration;
-import tobyspring.splearn.domain.*;
+import tobyspring.splearn.domain.member.*;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@Transactional // 테스트에서 사용하면 테스트 끝날때마다 초기화한다. 이때 기존 트랜잭션 전파 속성이 다르면 제대로 동작 안될 수 있음
+// 테스트에서 사용하면 테스트 끝날때마다 초기화한다. 이때 기존 트랜잭션 전파 속성이 다르면 제대로 동작 안될 수 있음
+@Transactional
 @SpringBootTest
 @Import(SplearnTestConfiguration.class)
 record MemberRegisterTest(MemberRegister memberRegister, EntityManager em) {
@@ -21,6 +23,7 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager em) {
     void register() {
         Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
 
+        System.out.println(member);
         assertThat(member.getId()).isNotNull();
         assertThat(member.getStatus()).isEqualTo(MemberStatus.PENDING);
     }
@@ -51,12 +54,59 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager em) {
 
     @Test
     void activate() {
-        Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
-        em.flush();
-        em.clear();
+        Member member = registerMember();
         member = memberRegister.activate(member.getId());
         em.flush();
         em.clear();
         assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
+        assertThat(member.getMemberDetail().getActivatedAt())
+                .isNotNull();
+    }
+
+    @Test
+    void deactivate() {
+        Member member = registerMember();
+        member = memberRegister.activate(member.getId());
+        em.flush();
+        em.clear();
+        assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
+        member = memberRegister.deactivate(member.getId());
+        em.flush();
+        em.clear();
+        assertThat(member.getStatus()).isEqualTo(MemberStatus.DEACTIVATED);
+        assertThat(member.getMemberDetail().getDeactivatedAt()).isNotNull();
+    }
+
+    @Test
+    void updateInfo() {
+        Member member = registerMember();
+
+        memberRegister.activate(member.getId());
+        em.flush();
+        em.clear();
+
+        member = memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("leeee", "toby100", ""));
+        em.flush();
+        em.clear();
+
+        assertThat(member.getMemberDetail().getProfile().address()).isEqualTo("toby100");
+        assertThat(member.getNickname()).isEqualTo("leeee");
+        assertThat(member.getMemberDetail().getIntroduction()).isEqualTo("");
+    }
+
+    private Member registerMember() {
+        Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
+        em.flush();
+        em.clear();
+        return member;
     }
 }
+
+
+
+/* *
+ * 현재 record에 @Transactional을 추가해놔서 빨간줄이 뜨는데
+ * 이게 record(final class)에 트랜잭션 AOP 적용하려 빨간줄을 내뱉는거임
+ * 근데 우리 목적은 트랜잭션 적용은 아니고 메서드 끝나면 롤백하려고 달아놓은거라
+ * 걍 경고 꺼놓음 ㅇㅇ
+ */
