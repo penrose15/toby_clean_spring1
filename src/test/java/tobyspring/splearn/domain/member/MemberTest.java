@@ -3,10 +3,10 @@ package tobyspring.splearn.domain.member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static tobyspring.splearn.domain.member.MemberFixture.*;
+
 
 class MemberTest {
     Member member;
@@ -23,19 +23,19 @@ class MemberTest {
     void registerMember() {
         assertThat(member.getStatus())
                 .isEqualTo(MemberStatus.PENDING);
-        assertThat(member.getMemberDetail().getRegisteredAt())
+        assertThat(member.getDetail().getRegisteredAt())
                 .isNotNull();
     }
 
     @Test
     void activateMember() {
-        assertThat(member.getMemberDetail().getActivatedAt())
+        assertThat(member.getDetail().getActivatedAt())
                 .isNull();
         member.activate();
 
         assertThat(member.getStatus())
                 .isEqualTo(MemberStatus.ACTIVE);
-        assertThat(member.getMemberDetail().getActivatedAt())
+        assertThat(member.getDetail().getActivatedAt())
                 .isNotNull();
     }
 
@@ -70,15 +70,6 @@ class MemberTest {
     void verifyPassword() {
         assertThat(member.verifyPassword("password1!", passwordEncoder)).isTrue();
         assertThat(member.verifyPassword("hello", passwordEncoder)).isFalse(); // wrong password
-    }
-
-    @Test
-    void changeNickname() {
-        assertThat(member.getNickname()).isEqualTo("charlie");
-
-        member.changeNickname("charlie1");
-
-        assertThat(member.getNickname()).isEqualTo("charlie1");
     }
 
     @Test
@@ -120,8 +111,14 @@ class MemberTest {
         member.updateInfo(new MemberInfoUpdateRequest("leo", "toby100", "자기소개"));
 
         assertThat(member.getNickname()).isEqualTo("leo");
-        assertThat(member.getMemberDetail().getProfile().address()).isEqualTo("toby100");
-        assertThat(member.getMemberDetail().getIntroduction()).isEqualTo("자기소개");
+        assertThat(member.getDetail().getProfile().address()).isEqualTo("toby100");
+        assertThat(member.getDetail().getIntroduction()).isEqualTo("자기소개");
+    }
+
+    @Test
+    void updateInfoFail() {
+        assertThatThrownBy(() -> member.updateInfo(new MemberInfoUpdateRequest("leo", "toby100", "자기소개")))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test

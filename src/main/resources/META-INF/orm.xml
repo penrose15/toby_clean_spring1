@@ -31,7 +31,7 @@
                 <column name="status" nullable="false" length="50"/>
                 <enumerated>STRING</enumerated>
             </basic>
-            <one-to-one name="memberDetail" fetch="LAZY">
+            <one-to-one name="detail" fetch="LAZY">
                 <cascade>
                     <cascade-all/>
                 </cascade>
@@ -48,8 +48,6 @@
             </unique-constraint>
         </table>
         <attributes>
-            <embedded name="profile">
-            </embedded>
             <basic name="introduction">
                 <column column-definition="TEXT"/>
             </basic>
@@ -62,6 +60,8 @@
             <basic name="deactivatedAt">
                 <column name="deactivated_at"/>
             </basic>
+            <embedded name="profile">
+            </embedded>
         </attributes>
     </entity>
 

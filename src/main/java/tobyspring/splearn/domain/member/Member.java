@@ -1,6 +1,6 @@
 package tobyspring.splearn.domain.member;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SuppressWarnings("JpaAttributeTypeInspection")
 public class Member extends AbstractEntity {
 
     @NaturalId // @Id 대신 사용 가능한 자연키로, Id 가 인조키인 경우 대체로 사용가능하다
@@ -32,7 +33,7 @@ public class Member extends AbstractEntity {
 
     private MemberStatus status;
 
-    private MemberDetail memberDetail;
+    private MemberDetail detail;
 
     public static Member register(MemberRegisterRequest createRequest, PasswordEncoder passwordEncoder) {
         Member member = new Member();
@@ -43,7 +44,7 @@ public class Member extends AbstractEntity {
 
         member.status = MemberStatus.PENDING;
 
-        member.memberDetail = MemberDetail.create();
+        member.detail = MemberDetail.create();
 
         return member;
     }
@@ -52,28 +53,26 @@ public class Member extends AbstractEntity {
         Assert.state(status == MemberStatus.PENDING, "PENDING 상태가 아닙니다.");
 
         this.status = MemberStatus.ACTIVE;
-        this.memberDetail.setActivatedAt();
+        this.detail.setActivatedAt();
     }
 
     public void deactivate() {
         Assert.state(status == MemberStatus.ACTIVE, "ACTIVE 상태가 아닙니다.");
 
         this.status = MemberStatus.DEACTIVATED;
-        this.memberDetail.deactivated();
+        this.detail.deactivated();
     }
 
     public boolean verifyPassword(String password, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(password, this.passwordHash);
     }
 
-    public void changeNickname(String nickname) {
-        this.nickname = requireNonNull(nickname);
-    }
-
     public void updateInfo(MemberInfoUpdateRequest updateRequest) {
+        Assert.state(getStatus() == MemberStatus.ACTIVE, "활성화된 회원만 정보 수정이 가능합니다.");
+
         this.nickname = Objects.requireNonNull(updateRequest.nickname());
 
-        this.memberDetail.updateInfo(updateRequest);
+        this.detail.updateInfo(updateRequest);
     }
 
     public void changePassword(String password, PasswordEncoder passwordEncoder) {

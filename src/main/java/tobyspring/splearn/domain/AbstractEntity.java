@@ -5,7 +5,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
-import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.lang.Nullable;
 

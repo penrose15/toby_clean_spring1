@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tobyspring.splearn.SplearnTestConfiguration;
 import tobyspring.splearn.domain.member.*;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -59,7 +58,7 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager em) {
         em.flush();
         em.clear();
         assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
-        assertThat(member.getMemberDetail().getActivatedAt())
+        assertThat(member.getDetail().getActivatedAt())
                 .isNotNull();
     }
 
@@ -74,7 +73,7 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager em) {
         em.flush();
         em.clear();
         assertThat(member.getStatus()).isEqualTo(MemberStatus.DEACTIVATED);
-        assertThat(member.getMemberDetail().getDeactivatedAt()).isNotNull();
+        assertThat(member.getDetail().getDeactivatedAt()).isNotNull();
     }
 
     @Test
@@ -89,13 +88,52 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager em) {
         em.flush();
         em.clear();
 
-        assertThat(member.getMemberDetail().getProfile().address()).isEqualTo("toby100");
+        assertThat(member.getDetail().getProfile().address()).isEqualTo("toby100");
         assertThat(member.getNickname()).isEqualTo("leeee");
-        assertThat(member.getMemberDetail().getIntroduction()).isEqualTo("");
+        assertThat(member.getDetail().getIntroduction()).isEqualTo("");
+    }
+
+    @Test
+    void updateInfoFail() {
+        Member member = registerMember();
+
+        memberRegister.activate(member.getId());
+        memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("leeee", "toby100", ""));
+        em.flush();
+        em.clear();
+
+        Member member2 = registerMember("toby200@splearn.com");
+        memberRegister.activate(member2.getId());
+        em.flush();
+        em.clear();
+
+        // 프로필 주소 중복 안됨
+        assertThatThrownBy(() -> memberRegister.updateInfo(member2.getId(), new MemberInfoUpdateRequest("james", "toby100", "")))
+                .isInstanceOf(DuplicateProfileException.class);
+
+        // 중복되지 않는 프로필 주소는 가능
+        memberRegister.updateInfo(member2.getId(), new MemberInfoUpdateRequest("james", "toby200", ""));
+
+        // 기존 프로필 주소로 바꾸는것도 가능
+        memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("tobylee", "toby100", ""));
+
+        // 프로필 주소 제거 가능
+        memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("tobylee", "", ""));
+
+        // 프로필 주소 중복 안됨
+        assertThatThrownBy(() -> memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("tobylee", "toby200", "")))
+                .isInstanceOf(DuplicateProfileException.class);
     }
 
     private Member registerMember() {
         Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest());
+        em.flush();
+        em.clear();
+        return member;
+    }
+
+    private Member registerMember(String email) {
+        Member member = memberRegister.register(MemberFixture.createMemberRegisterRequest(email));
         em.flush();
         em.clear();
         return member;
