@@ -13,7 +13,7 @@ class SplearnApplicationTest {
     void run() {
         // static 메서드 mocking
         // 한 스레드에 staticMocking은 한번밖에 못하므로 .close() 를 테스트 끝내고 수행해야 함
-        try (MockedStatic<SplearnApplication> mocked = Mockito.mockStatic(SplearnApplication.class)) {
+        try (MockedStatic<SpringApplication> mocked = Mockito.mockStatic(SpringApplication.class)) {
 
             SplearnApplication.main(new String[0]);
 
